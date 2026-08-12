@@ -25,11 +25,11 @@ export function readRecords() {
 }
 export function saveRecords(records) { localStorage.setItem(STORE_KEY, JSON.stringify(records)); }
 export function addRecord(input) {
-  const record = { ...input, id: crypto.randomUUID(), days: Number(input.days), coord: [Number(input.longitude), Number(input.latitude)] };
+  const record = { ...input, id: crypto.randomUUID(), days: Number(input.days), coord: input.coord };
   const records = [...readRecords(), record]; saveRecords(records); return records;
 }
 export function addTripRecord(input) {
-  const record = { id: crypto.randomUUID(), city: input.city.trim(), region: input.region.trim() || "票据识别", coord: [Number(input.longitude), Number(input.latitude)], date: input.date, days: Number(input.days || 1), source: "ticket-ocr", ticketType: input.ticketType, ticketNumber: input.ticketNumber };
+  const record = { id: crypto.randomUUID(), city: input.city.trim(), region: input.region.trim() || "票据识别", coord: input.coord, date: input.date, days: Number(input.days || 1), source: "ticket-ocr", ticketType: input.ticketType, ticketNumber: input.ticketNumber };
   if (!isRecord(record)) throw new Error("请补充有效的目的地和坐标后再保存");
   const records = [...readRecords(), record]; saveRecords(records); return records;
 }
