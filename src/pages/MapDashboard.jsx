@@ -5,11 +5,12 @@ import { GeoComponent, TitleComponent, TooltipComponent } from "echarts/componen
 import { CanvasRenderer } from "echarts/renderers";
 import { ACHIEVEMENTS, CITY_GUIDES, achievementFor, nextAchievementFor } from "../lib/cityGuide.js";
 import "./cityExplorer.css";
+import TripPlanCard from "../components/TripPlanCard.jsx";
 
 echarts.use([GeoComponent, TitleComponent, TooltipComponent, EffectScatterChart, LinesChart, MapChart, CanvasRenderer]);
 
 function CityExplorer({ city, record, onClose }) {
-  const [tab, setTab] = useState("sights");
+  const [tab, setTab] = useState("sights"); const [view, setView] = useState("guide");
   const guide = CITY_GUIDES[city];
   if (!city) return null;
   const items = tab === "sights" ? guide?.sights : guide?.foods;
@@ -17,11 +18,11 @@ function CityExplorer({ city, record, onClose }) {
   return <div className="city-modal" role="dialog" aria-modal="true" aria-label={`${city}城市探索`}>
     <button className="city-modal-backdrop" aria-label="关闭城市探索" onClick={onClose} />
     <section className="city-modal-card">
-      <button className="city-modal-close" aria-label="关闭" onClick={onClose}>×</button>
+      <button className="city-modal-close" aria-label="关闭" onClick={onClose}>×</button>{view === "plan" ? <TripPlanCard city={city} guide={guide} onBack={() => setView("guide")} /> : <>
       <p className="eyebrow">CITY SCOOP</p>
       <div className="city-modal-title"><div><h2>{city}</h2><p>{guide?.tone || "新解锁的城市"} · 已收进雪糕柜</p></div><span>🍨</span></div>
       <div className="city-modal-tabs"><button className={tab === "sights" ? "is-selected" : ""} onClick={() => setTab("sights")}>🏛️ 必去景点</button><button className={tab === "foods" ? "is-selected" : ""} onClick={() => setTab("foods")}>🍜 当地美食</button></div>
-      {items ? <><div className="city-modal-grid">{items.map((item, index) => <article key={item} className={`city-modal-item item-${index % 3}`}><span>{isSight ? ["🏔️", "🌊", "🏛️"][index % 3] : ["🥣", "🍢", "🍲"][index % 3]}</span><b>{item}</b></article>)}</div><p className="city-modal-tip">{guide.tip}</p><a className="city-modal-link" href={guide.source.url} target="_blank" rel="noreferrer">查看 {city} 官方文旅信息 ↗</a></> : <div className="city-modal-empty"><span>🧭</span><p>这座城市的灵感卡正在准备中。</p><small>{record?.region || "已解锁"} · 先把这段旅程好好收进雪糕柜吧</small></div>}
+      {items ? <><div className="city-modal-grid">{items.map((item, index) => <article key={item} className={`city-modal-item item-${index % 3}`}><span>{isSight ? ["🏔️", "🌊", "🏛️"][index % 3] : ["🥣", "🍢", "🍲"][index % 3]}</span><b>{item}</b></article>)}</div><p className="city-modal-tip">{guide.tip}</p><a className="city-modal-link" href={guide.source.url} target="_blank" rel="noreferrer">查看 {city} 官方文旅信息 ↗</a><button className="button primary plan-open" onClick={() => setView("plan")}>🗓️ 为这里做个计划</button></> : <div className="city-modal-empty"><span>🧭</span><p>这座城市的灵感卡正在准备中。</p><small>{record?.region || "已解锁"} · 先把这段旅程好好收进雪糕柜吧</small></div>}</>}
     </section>
   </div>;
 }
