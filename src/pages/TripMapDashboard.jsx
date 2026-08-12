@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { addRecord, exportRecords, importRecords, readRecords } from "../lib/tripStore.js";
-import { findPlace } from "../lib/placeCatalog.js";
+import { resolvePlace } from "../lib/placeCatalog.js";
 import TicketScanner from "./TicketScanner.jsx";
 import InstallApp from "../components/InstallApp.jsx";
 import Onboarding from "../components/Onboarding.jsx";
@@ -15,7 +15,7 @@ function download(filename, text) { const link = document.createElement("a"); li
 function Collector({ onSaved }) {
   const [form, setForm] = useState(blankTrip); const [message, setMessage] = useState("");
   const update = (event) => setForm((value) => ({ ...value, [event.target.name]: event.target.value }));
-  const submit = (event) => { event.preventDefault(); const place = findPlace(form.placeId); if (!place || !form.date || !Number(form.days)) return setMessage("请选择省、市和区 / 县后再保存。"); onSaved(addRecord({ city: place.city.replace("市", ""), region: `${place.province}${place.city}${place.district}`, date: form.date, days: form.days, coord: place.coord, placeId: place.id })); setForm(blankTrip()); setMessage("这段旅程已冻进雪糕里啦，回看板就能看到！"); };
+  const submit = (event) => { event.preventDefault(); const place = resolvePlace(form.province, form.city, form.placeId); if (!place || !form.date || !Number(form.days)) return setMessage("请选择省、市并确认日期后再保存。"); onSaved(addRecord({ city: place.city.replace("市", ""), region: `${place.province}${place.city}${place.district || ""}`, date: form.date, days: form.days, coord: place.coord, placeId: place.id })); setForm(blankTrip()); setMessage("这段旅程已冻进雪糕里啦，回看板就能看到！"); };
   return <section className="collector"><div className="collector-intro"><p className="eyebrow">SCOOP A MEMORY</p><h2>收进一口旅程</h2><p>选择去过的省、市和区县，地图会自动定位。</p></div><form onSubmit={submit}><PlacePicker value={form} onChange={setForm} /><div className="form-grid"><label>是哪一天？<input name="date" type="date" value={form.date} onChange={update} /></label><label>停留几天？<input name="days" type="number" min="1" max="365" value={form.days} onChange={update} /></label></div><button className="button primary submit" type="submit">冻进我的雪糕里</button>{message && <p className="form-message" role="status">{message}</p>}</form></section>;
 }
 

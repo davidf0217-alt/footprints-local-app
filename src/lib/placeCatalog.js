@@ -1,5 +1,8 @@
-// 首批内置地点目录：采集时由目录提供中心坐标，用户不需要手填经纬度。
-// 后续可替换为全国行政区数据包或云端只读目录，记录仍保留 placeId 与坐标快照。
+import provinces from "./data/provinces.json";
+import cities from "./data/cities.json";
+import coordinateRegions from "./data/city-coordinates.json";
+
+// 精选区县提供更细的落点；全国城市来自内置行政区目录，离线也可选择。
 export const PLACE_CATALOG = [
   { id: "henan-zhengzhou-jinshui", province: "河南省", city: "郑州市", district: "金水区", coord: [113.6606, 34.7998] },
   { id: "henan-zhengzhou-erqi", province: "河南省", city: "郑州市", district: "二七区", coord: [113.6402, 34.7247] },
@@ -15,3 +18,28 @@ export const PLACE_CATALOG = [
 
 export const unique = (items) => [...new Set(items)];
 export function findPlace(id) { return PLACE_CATALOG.find((item) => item.id === id); }
+
+const cityCenterOverrides = Object.fromEntries(PLACE_CATALOG.map((item) => [`${item.province}:${item.city}`, item.coord]));
+const normalizeName = (name = "") => name.replace(/[市州盟地区特别行政区]/g, "");
+const cityCoordinates = new Map();
+coordinateRegions.forEach((region) => region.children?.forEach((item) => {
+  cityCoordinates.set(`${normalizeName(region.name)}:${normalizeName(item.name)}`, [Number(item.log), Number(item.lat)]);
+}));
+const mainlandCityCenter = (province, city) => cityCoordinates.get(`${normalizeName(province)}:${normalizeName(city)}`) || cityCoordinates.get(`${normalizeName(province)}:${normalizeName(province)}`) || [116.4074, 39.9042];
+
+export const PROVINCES = provinces.map((item) => ({ code: item.code, name: item.name, province: item.province }));
+export const CITIES = cities.map((item) => {
+  const province = PROVINCES.find((value) => value.province === item.province);
+  return {
+    id: `city-${item.code}`,
+    code: item.code,
+    province: province?.name || "其他地区",
+    city: item.name,
+    district: "",
+    coord: cityCenterOverrides[`${province?.name}:${item.name}`] || mainlandCityCenter(province?.name, item.name),
+  };
+});
+
+export const placesForCity = (province, city) => PLACE_CATALOG.filter((item) => item.province === province && item.city === city);
+export const findCity = (province, city) => CITIES.find((item) => item.province === province && item.city === city);
+export const resolvePlace = (province, city, placeId) => findPlace(placeId) || findCity(province, city);
