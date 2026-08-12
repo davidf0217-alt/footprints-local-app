@@ -3,7 +3,14 @@ import { syncAll } from "../lib/cloudSync.js";
 import { cloudConfigured, supabase } from "../lib/supabaseClient.js";
 import "./cloudAccount.css";
 
-const friendlyError = (error) => error?.message?.includes("Invalid login") ? "邮箱或密码不正确。" : error?.message || "暂时无法连接云端，请稍后再试。";
+const friendlyError = (error) => {
+  const message = error?.message || "";
+  if (/invalid login credentials/i.test(message)) return "账号尚未注册，或邮箱/密码不正确。请先点“没有账号？注册”。";
+  if (/email not confirmed|email.*confirm/i.test(message)) return "这个账号尚未完成邮箱验证。请在邮箱里打开 Supabase 的验证邮件后再登录。";
+  if (/signup.*disabled|signups not allowed/i.test(message)) return "当前 Supabase 项目未开启邮箱注册，需要在 Authentication 的 Email 设置中启用。";
+  if (/network|fetch|failed to fetch/i.test(message)) return "网络暂时无法连接 Supabase；这不是账号密码错误，请稍后重试。";
+  return message || "暂时无法连接云端，请稍后再试。";
+};
 const maskEmail = (email = "") => { const [name, domain] = email.split("@"); return name && domain ? `${name.slice(0, 2)}***@${domain}` : "当前账号"; };
 
 export default function CloudAccount({ onSynced }) {
