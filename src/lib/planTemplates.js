@@ -6,5 +6,5 @@ export const PLAN_TEMPLATES = {
   青岛: { decisions: ["海边行程留出天气备选方案。", "崂山需要独立预留足够时段。", "海鲜价格和餐厅营业请出发前确认。"], days: [["八大关", "海边散步", "当地海鲜"], ["崂山", "返程 / 自由安排"]] },
   长沙: { decisions: ["山、水、夜宵适合拆开体验。", "高峰期餐饮要避开饭点或提前确认。", "景点与交通开放信息以官方为准。"], days: [["岳麓山", "当地小吃", "夜间漫步"], ["橘子洲", "返程 / 自由安排"]] },
 };
-export const BUDGETS = [{ id: "save", label: "省钱", range: "¥600–1,000 / 人", note: "以公共交通与简约住宿为主" }, { id: "balanced", label: "舒适", range: "¥1,200–2,000 / 人", note: "住宿、门票、餐饮较均衡" }, { id: "comfort", label: "宽松", range: "¥2,400–3,800 / 人", note: "留出更充足的住宿与体验空间" }];
+export const BUDGETS = [{ id: "save", label: "省钱", min: 600, max: 1000, note: "以公共交通与简约住宿为主" }, { id: "balanced", label: "舒适", min: 1200, max: 2000, note: "住宿、门票、餐饮较均衡" }, { id: "comfort", label: "宽松", min: 2400, max: 3800, note: "留出更充足的住宿与体验空间" }];
 export const CHECKLIST = ["交通班次 / 接送", "住宿与入住时间", "景点预约与开放状态", "天气与装备", "证件、支付与充电"];
