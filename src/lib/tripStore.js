@@ -20,8 +20,8 @@ const isRecord = (item) => item && typeof item.id === "string" && typeof item.ci
 export function readRecords() {
   try {
     const value = JSON.parse(localStorage.getItem(STORE_KEY));
-    return Array.isArray(value) && value.every(isRecord) ? value : SAMPLE_RECORDS;
-  } catch { return SAMPLE_RECORDS; }
+    return Array.isArray(value) && value.every(isRecord) ? value : [];
+  } catch { return []; }
 }
 export function saveRecords(records) { localStorage.setItem(STORE_KEY, JSON.stringify(records)); }
 export function addRecord(input) {
@@ -33,7 +33,7 @@ export function addTripRecord(input) {
   if (!isRecord(record)) throw new Error("请补充有效的目的地和坐标后再保存");
   const records = [...readRecords(), record]; saveRecords(records); return records;
 }
-export function exportRecords() { return JSON.stringify({ version: 1, note: "示例数据，路线与统计均为虚构，不代表真实个人活动", exportedAt: new Date().toISOString(), records: readRecords() }, null, 2); }
+export function exportRecords() { return JSON.stringify({ version: 1, exportedAt: new Date().toISOString(), records: readRecords() }, null, 2); }
 export function importRecords(text) {
   const payload = JSON.parse(text);
   if (!payload || !Array.isArray(payload.records) || !payload.records.every(isRecord)) throw new Error("文件格式不正确");

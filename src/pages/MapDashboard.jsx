@@ -3,7 +3,6 @@ import * as echarts from "echarts/core";
 import { EffectScatterChart, LinesChart, MapChart } from "echarts/charts";
 import { GeoComponent, TitleComponent, TooltipComponent } from "echarts/components";
 import { CanvasRenderer } from "echarts/renderers";
-import { ORIGIN } from "../lib/tripStore.js";
 import { ACHIEVEMENTS, CITY_GUIDES, achievementFor, nextAchievementFor } from "../lib/cityGuide.js";
 import "./cityExplorer.css";
 
@@ -27,14 +26,14 @@ function CityExplorer({ city, record, onClose }) {
   </div>;
 }
 
-export default function MapDashboard({ records }) {
+export default function MapDashboard({ records, onCollect }) {
   const chartRef = useRef(null); const instanceRef = useRef(null);
   const [state, setState] = useState("loading"); const [playIndex, setPlayIndex] = useState(-1); const [playing, setPlaying] = useState(false); const [selectedCity, setSelectedCity] = useState(null);
   const timeline = useMemo(() => [...records].sort((a, b) => a.date.localeCompare(b.date)), [records]);
   const active = playIndex < 0 ? records : timeline.slice(0, playIndex + 1); const current = timeline[playIndex];
   const unlockedCities = useMemo(() => [...new Set(records.map((item) => item.city.trim()).filter(Boolean))], [records]);
   const currentAchievement = achievementFor(unlockedCities.length); const nextAchievement = nextAchievementFor(unlockedCities.length);
-  const cityGuides = unlockedCities.map((city) => ({ city, guide: CITY_GUIDES[city] })).filter((item) => item.guide);
+  const cityGuides = Object.entries(CITY_GUIDES).map(([city, guide]) => ({ city, guide, unlocked: unlockedCities.includes(city) }));
   const selectedRecord = records.find((item) => item.city === selectedCity);
   const stats = [{ value: active.length, label: "雪糕球" }, { value: unlockedCities.length, label: "解锁城市" }, { value: active.reduce((sum, item) => sum + item.days, 0), label: "旅行天数" }, { value: playIndex < 0 ? timeline.length : playIndex + 1, label: "回味进度" }];
 
@@ -42,7 +41,7 @@ export default function MapDashboard({ records }) {
   useEffect(() => {
     if (state !== "ready" || !chartRef.current) return;
     const chart = instanceRef.current || echarts.init(chartRef.current); instanceRef.current = chart;
-    chart.setOption({ backgroundColor: "transparent", title: { text: "雪糕旅程地图", subtext: "点一座城市，打开它的探索卡", left: "center", top: 12, textStyle: { color: "#584445", fontSize: 18, fontWeight: 700 }, subtextStyle: { color: "#86868b", fontSize: 12 } }, tooltip: { show: false }, geo: { map: "china", roam: true, zoom: 1.15, itemStyle: { areaColor: "#f8f4f3", borderColor: "#ded9d7" }, emphasis: { itemStyle: { areaColor: "#f7e9df" } } }, series: [{ type: "effectScatter", coordinateSystem: "geo", rippleEffect: { brushType: "stroke", scale: 4 }, symbolSize: (value) => 8 + value[2] * 3, itemStyle: { color: "#f48b9f" }, label: { show: true, position: "right", formatter: "{b}", color: "#584445", fontSize: 10 }, data: active.map((item) => ({ name: item.city, value: [...item.coord, item.days], record: item })) }, { type: "lines", coordinateSystem: "geo", effect: { show: true, period: 4, symbol: "arrow", symbolSize: 6, color: "#f48b9f" }, lineStyle: { color: "#f48b9f", width: 1.2, opacity: .5, curveness: .25 }, data: active.map((item) => ({ coords: [ORIGIN.coord, item.coord] })) }, { type: "effectScatter", coordinateSystem: "geo", symbolSize: 12, itemStyle: { color: "#cf6d80" }, label: { show: true, position: "top", formatter: ORIGIN.name, color: "#a34e65" }, data: [{ name: ORIGIN.name, value: ORIGIN.coord }] }] }, true);
+    chart.setOption({ backgroundColor: "transparent", title: { text: "雪糕旅程地图", subtext: records.length ? "点一座城市，打开它的探索卡" : "你的地图从第一座城市开始", left: "center", top: 12, textStyle: { color: "#584445", fontSize: 18, fontWeight: 700 }, subtextStyle: { color: "#86868b", fontSize: 12 } }, tooltip: { show: false }, geo: { map: "china", roam: true, zoom: 1.15, itemStyle: { areaColor: "#f8f4f3", borderColor: "#ded9d7" }, emphasis: { itemStyle: { areaColor: "#f7e9df" } } }, series: [{ type: "effectScatter", coordinateSystem: "geo", rippleEffect: { brushType: "stroke", scale: 4 }, symbolSize: (value) => 8 + value[2] * 3, itemStyle: { color: "#f48b9f" }, label: { show: true, position: "right", formatter: "{b}", color: "#584445", fontSize: 10 }, data: active.map((item) => ({ name: item.city, value: [...item.coord, item.days], record: item })) }, { type: "lines", coordinateSystem: "geo", effect: { show: true, period: 4, symbol: "arrow", symbolSize: 6, color: "#f48b9f" }, lineStyle: { color: "#f48b9f", width: 1.2, opacity: .5, curveness: .25 }, data: active.slice(1).map((item, index) => ({ coords: [active[index].coord, item.coord] })) }] }, true);
     const openCity = (params) => { if (params.data?.record) setSelectedCity(params.data.record.city); };
     chart.off("click"); chart.on("click", openCity);
     const resize = () => chart.resize(); addEventListener("resize", resize); return () => { chart.off("click", openCity); removeEventListener("resize", resize); };
