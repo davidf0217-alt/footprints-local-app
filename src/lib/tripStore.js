@@ -20,16 +20,18 @@ const isRecord = (item) => item && typeof item.id === "string" && typeof item.ci
 export function readRecords() {
   try {
     const value = JSON.parse(localStorage.getItem(STORE_KEY));
-    return Array.isArray(value) && value.every(isRecord) ? value : [];
+    // v1 曾把演示数据放进正式存储。升级后绝不把它带入真实足迹。
+    return Array.isArray(value) ? value.filter((item) => isRecord(item) && !item.id.startsWith("demo-")) : [];
   } catch { return []; }
 }
-export function saveRecords(records) { localStorage.setItem(STORE_KEY, JSON.stringify(records)); }
+export function saveRecords(records) { localStorage.setItem(STORE_KEY, JSON.stringify(records.filter(isRecord))); }
+export function replaceRecords(records) { saveRecords(records); return readRecords(); }
 export function addRecord(input) {
-  const record = { ...input, id: crypto.randomUUID(), days: Number(input.days), coord: input.coord };
+  const record = { ...input, id: crypto.randomUUID(), days: Number(input.days), coord: input.coord, updatedAt: new Date().toISOString() };
   const records = [...readRecords(), record]; saveRecords(records); return records;
 }
 export function addTripRecord(input) {
-  const record = { id: crypto.randomUUID(), city: input.city.trim(), region: input.region.trim() || "票据识别", coord: input.coord, date: input.date, days: Number(input.days || 1), source: "ticket-ocr", ticketType: input.ticketType, ticketNumber: input.ticketNumber };
+  const record = { id: crypto.randomUUID(), city: input.city.trim(), region: input.region.trim() || "票据识别", coord: input.coord, date: input.date, days: Number(input.days || 1), source: "ticket-ocr", ticketType: input.ticketType, ticketNumber: input.ticketNumber, placeId: input.placeId, updatedAt: new Date().toISOString() };
   if (!isRecord(record)) throw new Error("请补充有效的目的地和坐标后再保存");
   const records = [...readRecords(), record]; saveRecords(records); return records;
 }
@@ -42,4 +44,5 @@ export function importRecords(text) {
   const merged = [...existing, ...payload.records.filter((item) => !ids.has(item.id))];
   saveRecords(merged); return merged;
 }
-export function resetRecords() { saveRecords(SAMPLE_RECORDS); return SAMPLE_RECORDS; }
+// 仅供旧调用兼容；“清空”应当清空，而不是恢复示例。
+export function resetRecords() { saveRecords([]); return []; }

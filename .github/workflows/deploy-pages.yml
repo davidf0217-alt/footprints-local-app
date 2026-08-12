@@ -27,6 +27,10 @@ jobs:
           node-version: 20
       - run: npm install --no-audit --no-fund
       - run: npm run build
+        env:
+          # Publishable key 仅用于浏览器客户端；数据库数据由 RLS 隔离，绝不在此放 service_role。
+          VITE_SUPABASE_URL: https://zwgwrvtmzhayeygvbkju.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ZYKwmIhshEvuDJbkgGfR2g_t3c7k8eT
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
