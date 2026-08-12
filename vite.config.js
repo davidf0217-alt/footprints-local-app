@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig(({ command }) => ({
   plugins: [react()],
-  base: command === "build" ? "/footprints-local-app/" : "/",
+  base: command === "build" ? "/footprint-demo/" : "/",
   server: {
     host: "127.0.0.1",
     port: 5173,

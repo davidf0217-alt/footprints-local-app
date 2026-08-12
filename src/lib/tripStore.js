@@ -1,16 +1,21 @@
-export const ORIGIN = { name: "示例中心", coord: [116.4074, 39.9042] };
+// 公开城市中心经纬度（来源：公开地理资料，仅用于地图落点展示）。
+// 下面的“片段”标签是虚构示例顺序，不是真实日期，不代表任何真实个人行程。
+export const ORIGIN = { name: "北京", coord: [116.4074, 39.9042] };
 export const SAMPLE_RECORDS = [
-  { id: "sample-01", city: "示例城市甲", region: "示例区域一", coord: [113.6254, 34.7466], date: "2025-01-12", days: 3 },
-  { id: "sample-02", city: "示例城市乙", region: "示例区域二", coord: [114.0579, 22.5431], date: "2025-03-08", days: 3 },
-  { id: "sample-03", city: "示例城市丙", region: "示例区域三", coord: [114.3055, 30.5928], date: "2025-03-20", days: 2 },
-  { id: "sample-04", city: "示例城市丁", region: "示例区域四", coord: [104.0665, 30.5723], date: "2025-06-16", days: 2 },
-  { id: "sample-05", city: "示例城市戊", region: "示例区域五", coord: [120.3826, 36.0671], date: "2025-09-05", days: 4 },
-  { id: "sample-06", city: "示例城市己", region: "示例区域六", coord: [112.9388, 28.2282], date: "2025-12-22", days: 3 },
+  { id: "demo-01", city: "郑州", region: "河南省", coord: [113.6254, 34.7466], date: "示例·片段01", days: 3 },
+  { id: "demo-02", city: "深圳", region: "广东省", coord: [114.0579, 22.5431], date: "示例·片段02", days: 3 },
+  { id: "demo-03", city: "武汉", region: "湖北省", coord: [114.3055, 30.5928], date: "示例·片段03", days: 2 },
+  { id: "demo-04", city: "成都", region: "四川省", coord: [104.0665, 30.5723], date: "示例·片段04", days: 2 },
+  { id: "demo-05", city: "青岛", region: "山东省", coord: [120.3826, 36.0671], date: "示例·片段05", days: 4 },
+  { id: "demo-06", city: "长沙", region: "湖南省", coord: [112.9388, 28.2282], date: "示例·片段06", days: 3 },
 ];
 
 const STORE_KEY = "local-footprint-map-demo.records.v1";
+// date 字段在外部录入时仍是日历日期（用户自己填写的公开/测试数据）；
+// 内置示例记录则使用“示例·片段NN”这样的非日历标签，明确为虚构顺序而非真实行程日期。
 const isDate = (value) => /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(`${value}T00:00:00Z`));
-const isRecord = (item) => item && typeof item.id === "string" && typeof item.city === "string" && item.city.trim().length <= 30 && typeof item.region === "string" && item.region.trim().length <= 30 && isDate(item.date) && Number.isInteger(item.days) && item.days >= 1 && item.days <= 365 && Array.isArray(item.coord) && item.coord.length === 2 && Number.isFinite(item.coord[0]) && Number.isFinite(item.coord[1]) && item.coord[0] >= 73 && item.coord[0] <= 135 && item.coord[1] >= 18 && item.coord[1] <= 54;
+const isSegmentLabel = (value) => typeof value === "string" && /^示例·片段\d{2}$/.test(value);
+const isRecord = (item) => item && typeof item.id === "string" && typeof item.city === "string" && item.city.trim().length <= 30 && typeof item.region === "string" && item.region.trim().length <= 30 && (isDate(item.date) || isSegmentLabel(item.date)) && Number.isInteger(item.days) && item.days >= 1 && item.days <= 365 && Array.isArray(item.coord) && item.coord.length === 2 && Number.isFinite(item.coord[0]) && Number.isFinite(item.coord[1]) && item.coord[0] >= 73 && item.coord[0] <= 135 && item.coord[1] >= 18 && item.coord[1] <= 54;
 
 export function readRecords() {
   try {
@@ -28,7 +33,7 @@ export function addTripRecord(input) {
   if (!isRecord(record)) throw new Error("请补充有效的目的地和坐标后再保存");
   const records = [...readRecords(), record]; saveRecords(records); return records;
 }
-export function exportRecords() { return JSON.stringify({ version: 1, exportedAt: new Date().toISOString(), records: readRecords() }, null, 2); }
+export function exportRecords() { return JSON.stringify({ version: 1, note: "示例数据，路线与统计均为虚构，不代表真实个人活动", exportedAt: new Date().toISOString(), records: readRecords() }, null, 2); }
 export function importRecords(text) {
   const payload = JSON.parse(text);
   if (!payload || !Array.isArray(payload.records) || !payload.records.every(isRecord)) throw new Error("文件格式不正确");

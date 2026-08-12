@@ -1,7 +1,7 @@
 {
-  "name": "足迹 · 本地记录",
-  "short_name": "足迹",
-  "description": "轻量、私密的本地足迹记录工具",
+  "name": "雪糕足迹 · 甜甜的旅程记录",
+  "short_name": "雪糕足迹",
+  "description": "把每一段旅程，收进一支甜甜的雪糕里",
   "lang": "zh-CN",
   "start_url": "./#dashboard",
   "display": "standalone",
