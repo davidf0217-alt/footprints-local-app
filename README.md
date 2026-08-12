@@ -28,13 +28,24 @@ npm run build
 npm run preview
 ```
 
-## 安装为手机 App
+## 原生 App 安装与发布
 
-应用内顶部有“安装 App”按钮，会按设备展示相应指引。
+本项目已接入 Capacitor，并包含原生工程：`ios/` 与 `android/`。网页仍可用于公开预览；正式安装请使用原生包，而不是“添加到主屏幕”。
 
-- iPhone / iPad：使用 Safari 打开 HTTPS 地址，点击“安装 App”，再按引导从“分享”菜单选择“添加到主屏幕”。
-- Android：使用 Chrome 打开 HTTPS 地址，点击“安装 App”；若浏览器支持，会弹出系统安装确认。
-- 安装后会以独立窗口打开；地图、已访问页面和应用外壳可离线使用。票据 OCR 首次使用需下载本地语言模型，截图不会上传。
+### iPhone / iPad
+
+1. 在 Mac 安装完整 Xcode（Command Line Tools 不够），用 Apple ID 登录 Xcode。
+2. 在项目目录执行 `npm run ios`，会同步网页资源并打开 `ios/App/App.xcworkspace`。
+3. 在 Xcode 的 **Signing & Capabilities** 选择你的 Team；Bundle ID 为 `com.xuegao.footprints`，如冲突可改为自己的唯一标识。
+4. 连接 iPhone 后选择设备并点击 Run，即可直接安装调试版；发布给测试者请用 Archive → TestFlight，正式发布请提交 App Store Connect 审核。
+
+### Android
+
+1. 安装 Android Studio 与 Android SDK（建议 JDK 17）。
+2. 执行 `npm run android`，在 Android Studio 打开 `android/`。
+3. 连接设备即可 Run；对外分发请从 Build → Generate Signed Bundle / APK 生成签名 AAB（Google Play）或 APK。
+
+每次改网页后，先执行 `npm run native:sync`，再在 Xcode/Android Studio 编译。票据 OCR 图片仍仅在设备内识别；地图、已访问页面和应用外壳可离线使用。
 
 ## 推荐的修改入口（面向二次开发）
 

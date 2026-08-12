@@ -6,16 +6,25 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:native": "CAPACITOR_BUILD=1 vite build",
+    "native:sync": "npm run build:native && npx cap sync",
+    "ios": "npm run native:sync && npx cap open ios",
+    "android": "npm run native:sync && npx cap open android"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/core": "^8.5.0",
+    "@capacitor/ios": "^8.5.0",
     "echarts": "^5.4.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "tesseract.js": "^6.0.1"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.5.0",
     "@vitejs/plugin-react": "^4.2.1",
+    "typescript": "^7.0.2",
     "vite": "5.4.11"
   }
 }
